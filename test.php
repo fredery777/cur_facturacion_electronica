@@ -7,7 +7,7 @@ if(!defined('BILLING_DEBUG'))define('BILLING_DEBUG', true);//TEST
 if(!defined('TEST_SET_ID_DEBUG'))define('TEST_SET_ID_DEBUG', 'YOUR testSetId');//TEST
 if(!defined('TOKEN_BILLING'))define('TOKEN_BILLING', 'YOUR TOKEN');
 
- $url=(BILLING_DEBUG)?BASE_URL_API_BILLING.'invoice/'.BASE_URL_API_BILLING :URL_BASE_API_BILLING.'invoice';
+ $url=(BILLING_DEBUG)?BASE_URL_API_BILLING.'invoice/'.BASE_URL_API_BILLING :BASE_URL_API_BILLING.'invoice';
 
 $json_send="Your Data";
 $token=TOKEN_BILLING;
