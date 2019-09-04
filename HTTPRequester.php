@@ -22,25 +22,58 @@ class HTTPRequester {
      * @param       array $params
      * @return      HTTP-Response body or an empty string if the request fails or is empty
      */
-    public static function HTTPPost($url, array $params,$token='',$json=false) {
+   
+    public static function HTTPPost($url, array $params,$token='',$json=false,$host='') {
         $query = ($json)?json_encode($params):http_build_query($params); // Encode the data array into a JSON string
-        $headers[] = 'Content-Type: application/json';
+       
+        if($json)
+        {
+            $headers[] = 'Accept: application/json';
+            $headers[] = 'Content-Type: application/json';
+        }
+        $headers[] = 'Accept-Encoding: gzip, deflate';
+        $headers[] = 'Cache-Control: no-cache';
+        $headers[] = 'Connection: keep-alive';
         if(!empty($token))
         {
              $headers[] = 'Authorization: Bearer ' . $token;
         }
-       $ch = curl_init();
-       ($json)?curl_setopt($ch, CURLOPT_HTTPHEADER, $headers):curl_setopt($ch, CURLOPT_HEADER, false); // Inject the token into the header
-       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-       curl_setopt($ch, CURLOPT_POST, true); // Specify the request method as POST
-       curl_setopt($ch, CURLOPT_POSTFIELDS, $query); // Set the posted fields
-       curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); // This will follow any redirects
-       curl_setopt($ch, CURLOPT_URL, $url);
-       $result = curl_exec($ch); // Execute the cURL statement
-       curl_close($ch); // Close the cURL connection
+        if(!empty($host))
+        {
+            $headers[] = 'Host: '.$host; 
+        }
+         
         
-       return $result;
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => $url,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "POST",
+          CURLOPT_POSTFIELDS => $query,
+          CURLOPT_HTTPHEADER => $headers,
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if($err) 
+        {
+            $arr_error=array();
+            $arr_error['errors']=$err;
+            return json_encode($arr_error);
+        } 
+        
+       return $response;
     }
+    
+    
     /**
      * @description Make HTTP-PUT call
      * @param       $url
